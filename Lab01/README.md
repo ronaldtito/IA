@@ -1,4 +1,6 @@
-### Busquedas
+# Búsquedas a ciegas y heurísticas
+
+## Resultados obtenidos
 
 
 
