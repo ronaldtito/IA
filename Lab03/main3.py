@@ -28,18 +28,6 @@ class GraphA ():
         self.start = 0 #self.graph.nodes[0]['id'] -> Nodo inicial
 
 
-
-
-    #Dibuja el grafo creado
-    def draw_graph(self):
-        pos = nx.get_node_attributes(self.graph, 'pos')
-        nx.draw_networkx_nodes(self.graph, pos, node_size=80)
-        nx.draw_networkx_edges(self.graph,pos,edge_color='gray',width = 0.5)
-        nx.draw_networkx_labels(self.graph, pos, font_size=6, font_family="sans-serif")
-        plt.title('Grafo')
-        plt.show()
-    #----------------------------------------------------
-
     def generarPoblacion(self , numIndividuos):
         PI = []
 
@@ -58,20 +46,91 @@ class GraphA ():
         
         self.Ranking(PI)
         return PI
+    
+    def vs(self,comp):
+        if(len(comp) == 1):
+            return comp
+        ganadores = []
+        size = len(comp)
+        while(size):
+            if( comp[0][1] < comp[1][1] ):
+                ganadores.append(comp[0])
+            else:
+                ganadores.append(comp[1])
+            comp.pop(0)
+            comp.pop(0)
+            size -= 2
+        return self.vs(ganadores)
 
+    def Torneo(self,T_I):
+        comp = T_I
+        random.shuffle(comp)
+        res = []
+        if(len(T_I) % 2): 
+            tem = T_I[len(T_I) - 1]
+            print(tem)
+            print(comp)
+            comp.pop(len(T_I) - 1)
+            print(comp)
+            ganador = vs(comp)
+            print(ganador)
+            if( ganador[0][1] < tem[1] ):
+                return ganador
+            else:
+                return tem
+        else:
+            return self.vs(comp)
+
+    def nextGeneration(self, currentPoblation):
+        topTorneo = self.Torneo(currentPoblation)
+        topRuleta = self.Ruleta(currentPoblation)
+
+        Hijos = self.cruzamiento(topTorneo,topRuleta)
+        NextG = mutarPoblacion(Hijos)
+        return NextG
+
+    #--------------------------------------------- devuleve el mejor costo
     def Ranking(self, P_I):
         rank = []
-        for i in P_I:
-        #for i in range(len(P_I)):
+        #for i in P_I:
+        for i in range(len(P_I)-1):
             Costo = 0
-            for n in range(len(i)-2):
-                Costo = Costo + self.heuristic(self.graph.nodes[n]['pos'][0],self.graph.nodes[n]['pos'][1],self.graph.nodes[n+1]['pos'][0],self.graph.nodes[n+1]['pos'][0])
+            #for n in range(len(i)-2):
+            print(P_I[i])
+            for n in range(len(P_I[i])-2):
+                print(self.graph.nodes[P_I[i][n]]['id'])
+                print(self.graph.nodes[P_I[i][n+1]]['id'])
+                Costo1 = int(self.heuristic(self.graph.nodes[P_I[i][n]]['pos'][0],self.graph.nodes[P_I[i][n]]['pos'][1],self.graph.nodes[P_I[i][n]]['pos'][0],self.graph.nodes[P_I[i][n]]['pos'][1]))
+                Costo = Costo + Costo1
+                print(Costo1) 
+                print (Costo)
             P_I_rank = ((i,Costo))
             rank.append(P_I_rank)
+        print(rank)
+        rank = sorted(rank, key=lambda weight: weight[1])
+        print (rank)
+
+        return rank #debe retornar [(0,costo),(1,costo)])
 
     def heuristic(self, Ax,Ay, Bx,By):
         return math.sqrt(pow(Bx - Ax,2) + pow(By - Ay,2))
 
+#------------------------------------------
+    def AG(self,CantCiudades,numGeneraciones,numIndividuos):
+        
+        self.create_graph(CantCiudades)
+        self.draw_graph()
+        Poblacion = self.generarPoblacion(numIndividuos)
+
+        for i in range(numGeneraciones):
+            Poblacion = self.nextGeneration(Poblacion)
+
+            #Promedio = []
+        
+        #BestRuta = self.Ranking(Poblacion)
+        #return 
+
+   
 
     def numRam(self,min, max):
         num = random.randint(min, max)
@@ -135,19 +194,33 @@ class GraphA ():
             if n not in tem2:
                 pos = tem2.index('*')
                 tem2[pos] = n	
-	
+
+
         print(tem1)
         print(tem2)
 
-
+     #Dibuja el grafo creado
+    def draw_graph(self):
+        pos = nx.get_node_attributes(self.graph, 'pos')
+        nx.draw_networkx_nodes(self.graph, pos, node_size=80)
+        nx.draw_networkx_edges(self.graph,pos,edge_color='gray',width = 0.5)
+        nx.draw_networkx_labels(self.graph, pos, font_size=6, font_family="sans-serif")
+        plt.title('Grafo')
+        plt.show()
+    #----------------------------------------------------
 
 
 def Start():    
     Grafo = GraphA()
     #nodos = int(input('Ingrese Número de Nodos: \n'))
     #radio = int(input('Ingrese el Radio: \n'))
-    Grafo.create_graph(10)
-    Grafo.generarPoblacion(5)
+    numeroCiudades = 10
+    numeroGeneraciones = 20
+    numeroIndividuos = 5
+    Grafo.AG(numeroCiudades,numeroGeneraciones,numeroIndividuos)
     Grafo.draw_graph()
+
+
+
 
 Start()
