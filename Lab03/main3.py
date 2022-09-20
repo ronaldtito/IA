@@ -81,12 +81,23 @@ class GraphA ():
         else:
             return self.vs(comp)
 
+    def topRuleta(self,currentPoblation):
+        return currentPoblation[self.numRam(1,self.n)]
+
+
     def nextGeneration(self, currentPoblation):
         topTorneo = self.Torneo(currentPoblation)
         topRuleta = self.Ruleta(currentPoblation)
 
+
         Hijos = self.cruzamiento(topTorneo,topRuleta)
-        NextG = mutarPoblacion(Hijos)
+        Hijo1 = Hijos[0]
+        Hijo2 = Hijos[1]
+        self.mutacionBasadaPos(Hijo1)
+        self.mutacionBasadaPos(Hijo2)
+        #NextG = mutarPoblacion(Hijos)
+        NextG = [Hijo1,Hijo2]
+        
         return NextG
 
     #--------------------------------------------- devuleve el mejor costo
@@ -98,22 +109,26 @@ class GraphA ():
             #for n in range(len(i)-2):
             print(P_I[i])
             for n in range(len(P_I[i])-2):
-                print(self.graph.nodes[P_I[i][n]]['id'])
-                print(self.graph.nodes[P_I[i][n+1]]['id'])
-                Costo1 = int(self.heuristic(self.graph.nodes[P_I[i][n]]['pos'][0],self.graph.nodes[P_I[i][n]]['pos'][1],self.graph.nodes[P_I[i][n]]['pos'][0],self.graph.nodes[P_I[i][n]]['pos'][1]))
-                Costo = Costo + Costo1
-                print(Costo1) 
-                print (Costo)
+                #print(self.graph.nodes[P_I[i][n]]['id'])
+                #print(self.graph.nodes[P_I[i][n+1]]['id'])
+                Costo = Costo + int(self.heuristic(self.graph.nodes[P_I[i][n]]['id'],self.graph.nodes[P_I[i][n+1]]['id']))
             P_I_rank = ((i,Costo))
             rank.append(P_I_rank)
         print(rank)
         rank = sorted(rank, key=lambda weight: weight[1])
         print (rank)
 
-        return rank #debe retornar [(0,costo),(1,costo)])
+        return P_I[rank[0][0]] #debe retornar [(0,costo),(1,costo)])
 
     def heuristic(self, Ax,Ay, Bx,By):
         return math.sqrt(pow(Bx - Ax,2) + pow(By - Ay,2))
+
+    def heuristic(self, A, B):
+        ax =self.graph.nodes[A]["pos"][0]
+        ay =self.graph.nodes[A]["pos"][1]
+        bx =self.graph.nodes[B]["pos"][0]
+        by =self.graph.nodes[B]["pos"][1]
+        return math.sqrt(pow(ax-bx,2) + pow(ay-by,2))
 
 #------------------------------------------
     def AG(self,CantCiudades,numGeneraciones,numIndividuos):
@@ -195,11 +210,24 @@ class GraphA ():
                 pos = tem2.index('*')
                 tem2[pos] = n	
 
-
-        print(tem1)
-        print(tem2)
+        return [tem1,tem2]
+        """print(tem1)
+        print(tem2)"""
 
      #Dibuja el grafo creado
+    
+    def mutacionBasadaPos(self,arr):
+        print("mutacion")
+        n1 = numRam(1, len(arr) - 2)
+        n2 = numRam(1, len(arr) - 2)
+        while(n1 == n2):
+            n2 = numRam(0, len(arr) - 2)
+        print(str(n1) + '\t' + str(n2))
+        
+        tem = arr[n1]
+        arr[n1] = arr[n2]
+        arr[n2] = tem
+    
     def draw_graph(self):
         pos = nx.get_node_attributes(self.graph, 'pos')
         nx.draw_networkx_nodes(self.graph, pos, node_size=80)
