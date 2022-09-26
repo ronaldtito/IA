@@ -1,3 +1,4 @@
+import array
 from turtle import width
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -6,6 +7,7 @@ import numpy as np
 import random
 import math
 from scipy.spatial import distance
+from scipy.interpolate import interp1d
 
 #---------- Inicializacion -------------
 class GraphA ():
@@ -54,10 +56,11 @@ class GraphA ():
         plt.title('Grafo')
         plt.show()
 
-    def Solution(self,ruta):
+    def Solution(self,ruta,media,mejor,generation):
         pos = nx.get_node_attributes(self.graph, 'pos')
         CV = self.graph.copy()
 
+        plt.plot()
         nx.draw_networkx_nodes(CV, pos, node_size=80)
         nx.draw_networkx_edges(CV,pos,edge_color='gray',width = 0.5)
         nx.draw_networkx_labels(CV, pos, font_size=6, font_family="sans-serif")
@@ -72,6 +75,17 @@ class GraphA ():
             node_size=100,
             width=0.8,
         )
+        plt.title('Mejor Ruta')
+        plt.show()
+        plt.plot()
+
+        mejores =  interp1d(generation,mejor,kind ='linear')
+        medias = interp1d(generation,media, kind= 'linear')
+        plt.plot(generation,mejores(generation),'-',generation,medias(generation),'--')
+        plt.legend(['Mejores Rutas','Media de Rutas'])
+        plt.title('Mejor and Media')
+
+        plt.suptitle('AG')
         plt.show()
 #--------------- Funciones  --------------
 
@@ -80,7 +94,6 @@ class GraphA ():
         for i in range(len(P_I)):
             Costo = 0
             Route = list(nx.utils.pairwise(P_I[i]))
-            print(P_I[i])
             for n in range(len(Route)):
                 currentCity = Route[n][0]
                 neighbourCity = Route[n][1]
@@ -88,8 +101,17 @@ class GraphA ():
             ranking.append((i,int(Costo)))
         ranking = sorted(ranking, key=lambda weight: weight[1])
         return ranking
+
+    def mutacionBasadoPos(self, arr,mutation):
+        for a in range(len(arr)):
+            if (random.random()<mutation):
+                b = int(random.random() * len(arr)-1)
+                n1 = arr[a]
+                n2 = arr[b]
+                arr[a] = n1
+                arr[b] = n2
+        return arr
     def generarBits(self,arr,n):
-        print("generando bits")
         i = 0
         while( i < n):
             arr.append(self.numRam(0,1))
@@ -101,11 +123,9 @@ class GraphA ():
             arr.append("*")
             i += 1
     def cruzamiento(self,arr1, arr2):
-        print("cruzamiento")
         bits = []
         self.generarBits(bits,len(arr1))
         #bits = [1,0,1,1,0]
-        print(bits)
         size = len(arr1)
         tem1 = []
         self.cargarArray(tem1, size + 1)
@@ -115,8 +135,6 @@ class GraphA ():
         tem1[size - 1] = arr1[size - 1]
         tem2[0] = arr2[0]
         tem2[size - 1] = arr2[size - 1]
-        print(tem1)
-        print(tem2)	
 	
         i = 1 
         while(i < size - 1):
@@ -167,19 +185,6 @@ class GraphA ():
 
         return Hijos
 
-    def nextGeneration(self, currentPoblation, elitismo):
-        popRanked = self.Ranking(currentPoblation)
-        popSelect = self.selection(popRanked,elitismo)
-
-        Hijos = []
-        for i in range(len(popSelect)):
-            Hijos.append(currentPoblation[popSelect[i]])
-
-        Hijos = self.Cruzamiento_Poblacion(Hijos,elitismo)
-
-        NextG = Hijos
-        return NextG
-
     def selection(self, popRanked,elitismo):
         popSelect = []
 
@@ -199,31 +204,68 @@ class GraphA ():
                     popSelect.append(popRanked[i][0])
                     break
         return popSelect
+
+    def nextGeneration(self, currentPoblation, elitismo,mutation):
+        popRanked = self.Ranking(currentPoblation)
+        popSelect = self.selection(popRanked,elitismo)
+
+        Hijos = []
+        for i in range(len(popSelect)):
+            Hijos.append(currentPoblation[popSelect[i]])
+
+        Hijos = self.Cruzamiento_Poblacion(Hijos,elitismo)
+
+        #Mutacion
+        NextG = []
+        for indv in range(len(Hijos)):
+            mutatedIndv = self.mutacionBasadoPos(Hijos[indv],mutation)
+            NextG.append(mutatedIndv)
+        return NextG
+
+    
         
 #------------- Principal --------------------
-    def AG(self,CantCiudades,numGeneraciones,numIndividuos,elitismo):
+    def AG(self,CantCiudades,numGeneraciones,numIndividuos,elitismo,mutation):
         
         self.create_graph(CantCiudades)
         self.draw_graph()
         Poblacion = self.generarPoblacion(numIndividuos)
 
+        generation = []
+        media = []
+        mejor = []
+        suma = []
+        Population1 = self.Ranking(Poblacion)
+
+        mejor.append(Population1[0][1])
+        media.append(sum(j for i, j in Population1)/len(Population1))
+        generation.append(0)
+
     
         for i in range(numGeneraciones):
-            Poblacion = self.nextGeneration(Poblacion,elitismo)
+            Poblacion = self.nextGeneration(Poblacion,elitismo,mutation)
+            Population = self.Ranking(Poblacion)
+            mejor.append(Population[0][1])
+            media.append(sum(j for i, j in Population)/len(Population))
+            generation.append(i+1)
 
-            #Promedio = []
+        
         
 
         BestRuta = self.Ranking(Poblacion)
 
-        self.Solution(Poblacion[BestRuta[0][0]])
-        #return Poblacion[BestRuta[0]] 
+        self.Solution(Poblacion[BestRuta[0][0]],media,mejor,generation)
 
 
-numeroCiudades = 20
-numeroGeneraciones = 50
-numeroIndividuos = 60
-elitismo =12
+def Start():
+    numeroCiudades = 10
+    numeroGeneraciones = 60
+    numeroIndividuos = 40
+    elitismo =4
+    mutation = 0.02
 
-Prueba = GraphA()
-Prueba.AG(numeroCiudades,numeroGeneraciones,numeroIndividuos,elitismo)
+    AgenteViajero = GraphA()
+    AgenteViajero.AG(numeroCiudades,numeroGeneraciones,numeroIndividuos,elitismo,mutation)
+
+
+Start()
