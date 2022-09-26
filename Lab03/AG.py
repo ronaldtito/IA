@@ -21,7 +21,6 @@ class GraphA ():
         list_edge = nx.geometric_edges(self.graph, radius = self.dimension)
         self.graph.add_edges_from(list_edge)    
 
-
         self.start = 0 
 
     def numRam(self,min, max):
@@ -43,7 +42,7 @@ class GraphA ():
                     i=i+1
             Individuo.append(self.start)
             PI.append(Individuo)
-        
+        print(PI)
         return PI
 #----------- Graficos ---------------
     def draw_graph(self):
@@ -87,9 +86,12 @@ class GraphA ():
                 Costo += distance.euclidean(self.graph.nodes[currentCity]['pos'],self.graph.nodes[neighbourCity]['pos'])
             ranking.append((i,int(Costo)))
         ranking = sorted(ranking, key=lambda weight: weight[1])
+        print("[!] ranking ")
+        print(ranking)
         return ranking
+
     def generarBits(self,arr,n):
-        print("generando bits")
+        print("[-]generando bits")
         i = 0
         while( i < n):
             arr.append(self.numRam(0,1))
@@ -100,11 +102,11 @@ class GraphA ():
         while (i < n-1):
             arr.append("*")
             i += 1
+
     def cruzamiento(self,arr1, arr2):
-        print("cruzamiento")
+        print("[-] cruzamiento")
         bits = []
         self.generarBits(bits,len(arr1))
-        #bits = [1,0,1,1,0]
         print(bits)
         size = len(arr1)
         tem1 = []
@@ -115,8 +117,8 @@ class GraphA ():
         tem1[size - 1] = arr1[size - 1]
         tem2[0] = arr2[0]
         tem2[size - 1] = arr2[size - 1]
-        print(tem1)
-        print(tem2)	
+        print(arr1)
+        print(arr2)	
 	
         i = 1 
         while(i < size - 1):
@@ -125,8 +127,6 @@ class GraphA ():
 			    #print(pos)
                 tem1[pos] = arr2[pos]
             i += 1	
-        
-
         for n in arr1:
             if n not in tem1:
                 pos = tem1.index('*')
@@ -144,14 +144,15 @@ class GraphA ():
             if n not in tem2:
                 pos = tem2.index('*')
                 tem2[pos] = n	
-
+        print(tem1)
+        print(tem2)
+        print("[!] cruzamiento finalizado")
         return [tem1,tem2]
 
     def Cruzamiento_Poblacion(self,poblacion,elitismo):
         Hijos = []
         for i in range(elitismo):
             Hijos.append(poblacion[i])
-        
 
         i = elitismo
         cont = elitismo
@@ -203,9 +204,9 @@ class GraphA ():
 #------------- Principal --------------------
     def AG(self,CantCiudades,numGeneraciones,numIndividuos,elitismo):
         
-        self.create_graph(CantCiudades)
-        self.draw_graph()
-        Poblacion = self.generarPoblacion(numIndividuos)
+        self.create_graph(CantCiudades) #crea grafo
+        self.draw_graph() #dibuja grafo
+        Poblacion = self.generarPoblacion(numIndividuos) #genera rutas
 
     
         for i in range(numGeneraciones):
@@ -223,7 +224,7 @@ class GraphA ():
 numeroCiudades = 20
 numeroGeneraciones = 50
 numeroIndividuos = 60
-elitismo =12
+elitismo =2
 
 Prueba = GraphA()
 Prueba.AG(numeroCiudades,numeroGeneraciones,numeroIndividuos,elitismo)
