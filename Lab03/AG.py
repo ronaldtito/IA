@@ -85,7 +85,7 @@ class GraphA ():
                 currentCity = Route[n][0]
                 neighbourCity = Route[n][1]
                 Costo += distance.euclidean(self.graph.nodes[currentCity]['pos'],self.graph.nodes[neighbourCity]['pos'])
-            ranking.append((i,Costo))
+            ranking.append((i,int(Costo)))
         ranking = sorted(ranking, key=lambda weight: weight[1])
         return ranking
     def generarBits(self,arr,n):
@@ -152,6 +152,8 @@ class GraphA ():
         for i in range(elitismo):
             Hijos.append(poblacion[i])
         
+
+        #2 padres deben generar 2 hijos, aqui se generan mas hijos corregir
         for i in range(len(poblacion)-elitismo):
             padre = self.numRam(0,len(poblacion)-1)
             if padre != i:
@@ -189,9 +191,9 @@ class GraphA ():
         for i in range(len(popRanked)- elitismo):
             pick = 100*random.random()
             for n in range(0,len(popRanked)):
-                #if pick <= df.iat[i,3]:
+                if pick <= df.iat[n,3]:
                     popSelect.append(popRanked[i][0])
-                    #break
+                    break
         return popSelect
         
 #------------- Principal --------------------
