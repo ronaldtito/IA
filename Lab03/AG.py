@@ -153,13 +153,17 @@ class GraphA ():
             Hijos.append(poblacion[i])
         
 
-        #2 padres deben generar 2 hijos, aqui se generan mas hijos corregir
-        for i in range(len(poblacion)-elitismo):
-            padre = self.numRam(0,len(poblacion)-1)
+        i = elitismo
+        cont = elitismo
+
+        while cont <len(poblacion):
+            padre = self.numRam(elitismo,len(poblacion)-1)
             if padre != i:
                 hijo = self.cruzamiento(poblacion[i],poblacion[padre])
                 Hijos.append(hijo[0])
                 Hijos.append(hijo[1])
+                i += 1
+                cont +=2
 
         return Hijos
 
@@ -212,14 +216,14 @@ class GraphA ():
 
         BestRuta = self.Ranking(Poblacion)
 
-        self.Solution(Poblacion[BestRuta[0]])
-        return Poblacion[BestRuta[0]] 
+        self.Solution(Poblacion[BestRuta[0][0]])
+        #return Poblacion[BestRuta[0]] 
 
 
-numeroCiudades = 10
-numeroGeneraciones = 3
-numeroIndividuos = 5
-elitismo = 1
+numeroCiudades = 20
+numeroGeneraciones = 50
+numeroIndividuos = 60
+elitismo =12
 
 Prueba = GraphA()
 Prueba.AG(numeroCiudades,numeroGeneraciones,numeroIndividuos,elitismo)
